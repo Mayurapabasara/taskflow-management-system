@@ -136,6 +136,65 @@ class TasksTest extends TestCase
         $this->assertDatabaseCount('tasks', 0);
     }
 
+    public function test_completion_toggles_both_directions_with_reactive_counts_and_styling(): void
+    {
+        $project = $this->project();
+        $task = $project->tasks()->create(['title' => 'Toggle this task']);
+
+        $component = Livewire::test(Projects::class)->call('selectProject', $project->id)
+            ->assertSee('0 / 1 tasks completed')->assertSee('0%')
+            ->assertDontSee('line-through');
+        $this->assertCheckboxState($component->html(), $task->id, false);
+
+        $component->call('toggleTask', $task->id)->assertHasNoErrors()
+            ->assertSee('1 / 1 tasks completed')->assertSee('100%')->assertSee('line-through');
+        $this->assertTrue($task->fresh()->is_completed);
+        $this->assertCheckboxState($component->html(), $task->id, true);
+
+        $component->call('toggleTask', $task->id)->assertHasNoErrors()
+            ->assertSee('0 / 1 tasks completed')->assertSee('0%')->assertDontSee('line-through');
+        $this->assertFalse($task->fresh()->is_completed);
+        $this->assertCheckboxState($component->html(), $task->id, false);
+    }
+
+    public function test_completion_changes_are_scoped_to_the_selected_project(): void
+    {
+        $project = $this->project();
+        $task = $project->tasks()->create(['title' => 'Selected']);
+        $other = $this->project();
+        $otherTask = $other->tasks()->create(['title' => 'Other']);
+
+        Livewire::test(Projects::class)->call('selectProject', $project->id)
+            ->call('toggleTask', $task->id)
+            ->assertSee('1 / 1 tasks completed')->assertSee('0 / 1 tasks completed');
+        $this->assertFalse($otherTask->fresh()->is_completed);
+
+        Livewire::test(Projects::class)->call('selectProject', $project->id)
+            ->call('toggleTask', $otherTask->id)->assertNotFound();
+        $this->assertFalse($otherTask->fresh()->is_completed);
+    }
+
+    public function test_completion_requires_an_existing_task_and_selected_project(): void
+    {
+        $project = $this->project();
+        $task = $project->tasks()->create(['title' => 'Unchanged']);
+
+        Livewire::test(Projects::class)->call('toggleTask', $task->id)->assertNotFound();
+        Livewire::test(Projects::class)->call('selectProject', $project->id)
+            ->call('toggleTask', 999)->assertNotFound();
+
+        $this->assertFalse($task->fresh()->is_completed);
+    }
+
+    private function assertCheckboxState(string $html, int $taskId, bool $checked): void
+    {
+        $document = new \DOMDocument;
+        @$document->loadHTML($html);
+        $checkbox = $document->getElementById('task-completed-'.$taskId);
+        $this->assertNotNull($checkbox);
+        $this->assertSame($checked, $checkbox->hasAttribute('checked'));
+    }
+
     private function project(): Project
     {
         return Project::create(['name' => 'Project', 'description' => 'Task CRUD']);
