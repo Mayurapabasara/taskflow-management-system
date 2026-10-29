@@ -101,6 +101,25 @@ class DeleteProjectTest extends TestCase
         $this->assertModelMissing($task);
     }
 
+    public function test_livewire_completion_changes_control_the_deletion_rule(): void
+    {
+        $project = $this->project();
+        $task = $project->tasks()->create(['title' => 'Task']);
+        $component = Livewire::test(Projects::class)->call('selectProject', $project->id);
+
+        $component->call('toggleTask', $task->id)->call('toggleTask', $task->id)
+            ->call('delete', $project->id)->assertHasErrors('deletion')
+            ->assertSet('selectedProjectId', $project->id);
+        $this->assertModelExists($project);
+        $this->assertModelExists($task);
+
+        $component->call('toggleTask', $task->id)->call('delete', $project->id)
+            ->assertHasNoErrors()->assertSet('selectedProjectId', null)->assertSet('editingTaskId', null)
+            ->assertSee('Project deleted.');
+        $this->assertModelMissing($project);
+        $this->assertModelMissing($task);
+    }
+
     private function project(): Project
     {
         return Project::create(['name' => 'Assessment', 'description' => 'Deletion rule']);
