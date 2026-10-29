@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Actions\DeleteProject;
 use App\Models\Project;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,7 +57,10 @@ class Projects extends Component
 
     public function delete(int $id): void
     {
-        Project::findOrFail($id)->delete();
+        $this->resetValidation('deletion');
+        session()->forget('status');
+
+        app(DeleteProject::class)->handle($id);
 
         if ($this->editingId === $id) {
             $this->cancel();

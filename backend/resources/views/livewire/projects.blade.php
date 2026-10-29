@@ -8,6 +8,10 @@
         <div role="status" class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{{ session('status') }}</div>
     @endif
 
+    @error('deletion')
+        <div role="alert" class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">{{ $message }}</div>
+    @enderror
+
     <div class="grid items-start gap-8 lg:grid-cols-3">
         <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="project-form-title">
             <h2 id="project-form-title" class="mb-5 text-lg font-semibold">{{ $editingId ? 'Edit project' : 'New project' }}</h2>
