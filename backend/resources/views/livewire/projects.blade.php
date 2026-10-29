@@ -52,6 +52,7 @@
                     </div>
                     <progress aria-label="Task progress for {{ $project->name }}" value="{{ $project->completed_tasks_count }}" max="{{ max(1, $project->tasks_count) }}" class="mt-2 h-2 w-full overflow-hidden rounded-full accent-indigo-600"></progress>
                     <div class="mt-5 flex gap-3 border-t border-slate-100 pt-4">
+                        <button type="button" wire:click="selectProject({{ $project->id }})" wire:loading.attr="disabled" aria-pressed="{{ $selectedProjectId === $project->id ? 'true' : 'false' }}" class="rounded-lg bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">Tasks</button>
                         <button type="button" wire:click="edit({{ $project->id }})" wire:loading.attr="disabled" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-50" aria-label="Edit {{ $project->name }}">Edit</button>
                         <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" class="rounded-lg px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50" aria-label="Delete {{ $project->name }}">Delete</button>
                     </div>
@@ -64,4 +65,34 @@
             @endforelse
         </section>
     </div>
+
+    @if ($selectedProject)
+        <section wire:key="tasks-{{ $selectedProject->id }}" class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="tasks-heading">
+            <h2 id="tasks-heading" class="break-words text-xl font-semibold">Tasks for {{ $selectedProject->name }}</h2>
+            <form wire:submit="saveTask" class="mt-5 space-y-3">
+                <label for="task-title" class="block text-sm font-medium">{{ $editingTaskId ? 'Edit task title' : 'New task title' }}</label>
+                <input id="task-title" type="text" wire:model="taskTitle" maxlength="255" required aria-describedby="task-title-error" aria-invalid="{{ $errors->has('taskTitle') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                <p id="task-title-error" class="text-sm text-red-700">@error('taskTitle') {{ $message }} @enderror</p>
+                <div class="flex gap-3">
+                    <button type="submit" wire:loading.attr="disabled" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50">{{ $editingTaskId ? 'Save task' : 'Add task' }}</button>
+                    @if ($editingTaskId)
+                        <button type="button" wire:click="cancelTask" class="rounded-lg border border-slate-300 px-4 py-2 text-sm">Cancel</button>
+                    @endif
+                </div>
+            </form>
+            <ul class="mt-6 divide-y divide-slate-200">
+                @forelse ($selectedProject->tasks as $task)
+                    <li wire:key="task-{{ $task->id }}" class="flex flex-wrap items-center justify-between gap-3 py-4">
+                        <span class="min-w-0 flex-1 break-words">{{ $task->title }}</span>
+                        <div class="flex gap-2">
+                            <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">Edit</button>
+                            <button type="button" wire:click="deleteTask({{ $task->id }})" wire:confirm="Delete this task? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" class="rounded-lg px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50">Delete</button>
+                        </div>
+                    </li>
+                @empty
+                    <li class="py-6 text-sm text-slate-600">No tasks yet. Add the first task above.</li>
+                @endforelse
+            </ul>
+        </section>
+    @endif
 </div>
