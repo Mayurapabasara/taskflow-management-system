@@ -7,3 +7,33 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@layer base {
+    button, input, textarea, a {
+        @apply focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600;
+    }
+
+    button:not(:disabled), input[type='checkbox'], label[for] {
+        cursor: pointer;
+    }
+
+    button {
+        min-height: 2.75rem;
+    }
+
+    input:not([type='checkbox']), textarea {
+        cursor: text;
+    }
+
+    progress::-webkit-progress-bar {
+        @apply rounded-full bg-slate-100;
+    }
+
+    progress::-webkit-progress-value {
+        @apply rounded-full bg-indigo-600;
+    }
+
+    progress::-moz-progress-bar {
+        @apply rounded-full bg-indigo-600;
+    }
+}
