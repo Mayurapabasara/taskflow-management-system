@@ -39,6 +39,26 @@ class ProjectTaskRelationshipsTest extends TestCase
         $this->assertFalse(Task::findOrFail($id)->is_completed);
     }
 
+    public function test_project_and_task_timestamps_are_persisted_and_updated(): void
+    {
+        $this->freezeSecond();
+        $project = Project::create(['name' => 'TaskFlow', 'description' => 'Assessment project']);
+        $task = $project->tasks()->create(['title' => 'Initial title']);
+        $createdAt = now();
+
+        $this->assertTrue($project->fresh()->created_at->equalTo($createdAt));
+        $this->assertTrue($task->fresh()->created_at->equalTo($createdAt));
+
+        $this->travel(1)->minute();
+        $project->update(['name' => 'Updated project']);
+        $task->update(['title' => 'Updated task']);
+
+        foreach ([$project->fresh(), $task->fresh()] as $model) {
+            $this->assertTrue($model->created_at->equalTo($createdAt));
+            $this->assertTrue($model->updated_at->equalTo(now()));
+        }
+    }
+
     public function test_tasks_cannot_reference_a_missing_project(): void
     {
         $this->expectException(QueryException::class);

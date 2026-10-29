@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Livewire\Projects;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ProjectsTest extends TestCase
@@ -143,6 +145,50 @@ class ProjectsTest extends TestCase
     {
         Livewire::test(Projects::class)->call('edit', 999)->assertNotFound();
         Livewire::test(Projects::class)->call('delete', 999)->assertNotFound();
+    }
+
+    #[DataProvider('invalidProjectFields')]
+    public function test_each_invalid_field_is_rejected_on_creation_and_update(string $field, string $value, string $rule): void
+    {
+        $project = $this->project();
+
+        Livewire::test(Projects::class)->set('name', 'Valid name')->set('description', 'Valid description')
+            ->set($field, $value)->call('save')->assertHasErrors([$field => $rule]);
+
+        Livewire::test(Projects::class)->call('edit', $project->id)
+            ->set($field, $value)->call('save')->assertHasErrors([$field => $rule]);
+
+        $this->assertDatabaseCount('projects', 1);
+        $this->assertDatabaseHas('projects', ['id' => $project->id, 'name' => 'Assessment', 'description' => 'Project description']);
+    }
+
+    public static function invalidProjectFields(): array
+    {
+        return [
+            'missing name' => ['name', '', 'required'],
+            'whitespace name' => ['name', '   ', 'required'],
+            'long name' => ['name', str_repeat('a', 256), 'max'],
+            'missing description' => ['description', '', 'required'],
+            'whitespace description' => ['description', " \n\t ", 'required'],
+            'long description' => ['description', str_repeat('a', 10001), 'max'],
+        ];
+    }
+
+    public function test_project_fields_accept_their_maximum_lengths(): void
+    {
+        Livewire::test(Projects::class)->set('name', str_repeat('n', 255))
+            ->set('description', str_repeat('d', 10000))->call('save')->assertHasNoErrors();
+
+        $this->assertDatabaseHas('projects', ['name' => str_repeat('n', 255), 'description' => str_repeat('d', 10000)]);
+    }
+
+    public function test_client_cannot_replace_the_project_editing_id(): void
+    {
+        $project = $this->project();
+        $other = $this->project('Other');
+        $this->expectException(CannotUpdateLockedPropertyException::class);
+
+        Livewire::test(Projects::class)->call('edit', $project->id)->set('editingId', $other->id);
     }
 
     private function project(string $name = 'Assessment'): Project
