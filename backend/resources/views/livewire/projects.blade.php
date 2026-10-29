@@ -83,7 +83,8 @@
             <ul class="mt-6 divide-y divide-slate-200">
                 @forelse ($selectedProject->tasks as $task)
                     <li wire:key="task-{{ $task->id }}" class="flex flex-wrap items-center justify-between gap-3 py-4">
-                        <span class="min-w-0 flex-1 break-words">{{ $task->title }}</span>
+                        <input id="task-completed-{{ $task->id }}" type="checkbox" wire:click="toggleTask({{ $task->id }})" @checked($task->is_completed) wire:loading.attr="disabled" class="h-5 w-5 rounded accent-indigo-600 disabled:opacity-50">
+                        <label for="task-completed-{{ $task->id }}" @class(['min-w-0 flex-1 break-words', 'line-through text-slate-500' => $task->is_completed])>{{ $task->title }}</label>
                         <div class="flex gap-2">
                             <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">Edit</button>
                             <button type="button" wire:click="deleteTask({{ $task->id }})" wire:confirm="Delete this task? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" class="rounded-lg px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50">Delete</button>

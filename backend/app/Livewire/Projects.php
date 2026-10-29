@@ -81,6 +81,15 @@ class Projects extends Component
         session()->flash('status', 'Task deleted.');
     }
 
+    public function toggleTask(int $id): void
+    {
+        DB::transaction(function () use ($id): void {
+            $project = Project::query()->lockForUpdate()->findOrFail($this->selectedProjectId);
+            $task = $project->tasks()->lockForUpdate()->findOrFail($id);
+            $task->update(['is_completed' => ! $task->is_completed]);
+        }, attempts: 3);
+    }
+
     public function save(): void
     {
         $this->name = trim($this->name);
