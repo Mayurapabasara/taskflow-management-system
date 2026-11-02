@@ -8,7 +8,7 @@ Route::get('/', function () {
 })->name('backups.index');
 
 Route::get('/projects', function () {
-    return view('projects');
+    return to_route('backups.index');
 })->name('projects.index');
 
 Route::get('/projects/{project}/tasks', function (Project $project) {

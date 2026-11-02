@@ -14,18 +14,10 @@ class ProjectsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_project_page_renders_the_component_and_creation_form(): void
+    public function test_legacy_projects_url_redirects_to_the_project_dashboard(): void
     {
         $this->get(route('projects.index'))
-            ->assertOk()
-            ->assertSeeLivewire(Projects::class)
-            ->assertSee('New Project')
-            ->assertSee('Project details')
-            ->assertSee('Create project')
-            ->assertSee('Number of tasks')
-            ->assertSee('Completed tasks')
-            ->assertSee('Status')
-            ->assertSee('No projects yet');
+            ->assertRedirect(route('backups.index'));
     }
 
     public function test_projects_can_be_created_with_trimmed_input(): void

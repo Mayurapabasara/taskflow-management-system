@@ -29,7 +29,6 @@ class BackupManagerPageTest extends TestCase
             ->assertSee('Inactive')
             ->assertSee('Inbizsy')
             ->assertSee('Project Dashboard')
-            ->assertSee('Project Manager')
             ->assertSee('+ Add Project')
             ->assertSee(route('projects.tasks', $project), false)
             ->assertSee('Tasks')

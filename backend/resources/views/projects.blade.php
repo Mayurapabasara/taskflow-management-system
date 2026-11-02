@@ -36,14 +36,6 @@
                             <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11.25 12 4l9 7.25v8.25a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-8.25Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6"/></svg>
                             Project Dashboard
                         </a>
-                        <a href="{{ route('projects.index') }}" @class([
-                            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition',
-                            'bg-indigo-50 text-indigo-700' => request()->routeIs('projects.index'),
-                            'text-slate-600 hover:bg-slate-50 hover:text-slate-950' => ! request()->routeIs('projects.index'),
-                        ]) @if (request()->routeIs('projects.index')) aria-current="page" @endif>
-                            <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75A2.25 2.25 0 0 1 6.75 4.5h10.5a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25H6.75a2.25 2.25 0 0 1-2.25-2.25V6.75Z"/><path stroke-linecap="round" d="M8 9h8M8 13h8M8 17h4"/></svg>
-                            Project Manager
-                        </a>
                     </div>
                 </nav>
 
@@ -54,9 +46,7 @@
                 <header class="border-b border-slate-200 bg-white lg:hidden">
                     <div class="flex items-center justify-between px-4 py-4 sm:px-6">
                         <a href="{{ route('backups.index') }}" class="text-xl font-bold tracking-tight text-slate-950">Inbizsy</a>
-                        <a href="{{ route('projects.index') }}" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Project Manager">
-                            <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
-                        </a>
+                        <span class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Project workspace</span>
                     </div>
                 </header>
 
