@@ -17,6 +17,12 @@ class ProjectTasks extends Component
     #[Locked]
     public ?int $editingTaskId = null;
 
+    #[Locked]
+    public ?int $deletingTaskId = null;
+
+    #[Locked]
+    public string $deletingTaskTitle = '';
+
     public string $taskTitle = '';
 
     public string $assignedTo = '';
@@ -72,8 +78,24 @@ class ProjectTasks extends Component
         $this->resetValidation(['taskTitle', 'assignedTo']);
     }
 
-    public function deleteTask(int $id): void
+    public function confirmDeleteTask(int $id): void
     {
+        $task = Project::findOrFail($this->selectedProjectId)->tasks()->findOrFail($id);
+        $this->cancelTask();
+        $this->deletingTaskId = $task->id;
+        $this->deletingTaskTitle = $task->title;
+    }
+
+    public function cancelDeleteTask(): void
+    {
+        $this->reset('deletingTaskId', 'deletingTaskTitle');
+    }
+
+    public function deleteTask(?int $id = null): void
+    {
+        $id ??= $this->deletingTaskId;
+        abort_if($id === null, 404);
+
         DB::transaction(function () use ($id): void {
             $project = Project::query()->lockForUpdate()->findOrFail($this->selectedProjectId);
             $project->tasks()->findOrFail($id)->delete();
@@ -82,6 +104,8 @@ class ProjectTasks extends Component
         if ($this->editingTaskId === $id) {
             $this->cancelTask();
         }
+
+        $this->cancelDeleteTask();
 
         session()->flash('status', 'Task deleted.');
     }

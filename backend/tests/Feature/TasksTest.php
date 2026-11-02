@@ -87,6 +87,25 @@ class TasksTest extends TestCase
         $this->assertModelExists($otherTask);
     }
 
+    public function test_task_creation_editing_and_deletion_use_in_page_popups(): void
+    {
+        $project = $this->project();
+        $task = $project->tasks()->create(['title' => 'Remove me']);
+
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project])
+            ->call('startCreatingTask')->assertSet('showTaskForm', true)->assertSee('New task')
+            ->call('cancelTask')->assertSet('showTaskForm', false)
+            ->call('editTask', $task->id)->assertSet('showTaskForm', true)->assertSee('Edit task')
+            ->call('confirmDeleteTask', $task->id)
+            ->assertSet('deletingTaskId', $task->id)
+            ->assertSee('Delete task?')
+            ->call('cancelDeleteTask')->assertSet('deletingTaskId', null)
+            ->call('confirmDeleteTask', $task->id)->call('deleteTask')
+            ->assertSet('deletingTaskId', null)->assertSee('Task deleted.');
+
+        $this->assertModelMissing($task);
+    }
+
     public function test_another_projects_tasks_cannot_be_edited_or_deleted(): void
     {
         $project = $this->project();

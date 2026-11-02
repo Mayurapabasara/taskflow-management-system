@@ -19,7 +19,8 @@
     <div wire:loading.delay role="status" class="mb-4 text-sm text-indigo-700">Updating tasks…</div>
 
     @if ($showTaskForm)
-        <section class="mb-6 rounded-xl border border-indigo-200 bg-white p-6 shadow-sm" aria-labelledby="task-form-title">
+        <div class="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="task-form-title">
+        <section class="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
             <h2 id="task-form-title" class="text-lg font-semibold">{{ $editingTaskId ? 'Edit task' : 'New task' }}</h2>
             <form wire:submit="saveTask" class="mt-5 grid gap-4 sm:grid-cols-2">
                 <div>
@@ -46,6 +47,20 @@
                 </div>
             </form>
         </section>
+        </div>
+    @endif
+
+    @if ($deletingTaskId !== null)
+        <div class="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-task-title">
+            <section class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                <h2 id="delete-task-title" class="text-xl font-semibold">Delete task?</h2>
+                <p class="mt-2 text-slate-600">Delete “{{ $deletingTaskTitle }}”? This cannot be undone.</p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" wire:click="cancelDeleteTask" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button type="button" wire:click="deleteTask" wire:loading.attr="disabled" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">Delete task</button>
+                </div>
+            </section>
+        </div>
     @endif
 
     <section wire:key="tasks-{{ $selectedProject->id }}" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="tasks-heading">
@@ -76,7 +91,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex justify-end gap-2">
                                     <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" title="Edit task" class="grid h-8 w-8 place-items-center rounded-md bg-indigo-100 text-indigo-700 hover:bg-indigo-200 disabled:opacity-50">✎</button>
-                                    <button type="button" wire:click="deleteTask({{ $task->id }})" wire:confirm="Delete this task? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" title="Delete task" class="grid h-8 w-8 place-items-center rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50">⌫</button>
+                                    <button type="button" wire:click="confirmDeleteTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" title="Delete task" class="grid h-8 w-8 place-items-center rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50">⌫</button>
                                 </div>
                             </td>
                         </tr>
