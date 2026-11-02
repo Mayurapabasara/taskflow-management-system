@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ isset($project) ? $project->name.' · Tasks' : 'Projects' }} · Inbizsy</title>
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <title>{{ isset($project) ? 'Tasks' : 'Projects' }} · Inbizsy</title>
+        @vite(['resources/css/app.css'])
         @livewireStyles
     </head>
     <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
@@ -13,13 +13,13 @@
             <aside class="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
                 <div class="border-b border-slate-100 px-6 py-7">
                     <a href="{{ route('backups.index') }}" class="inline-flex items-center gap-3" aria-label="Inbizsy project workspace">
-                        <span aria-hidden="true" class="relative block h-10 w-10">
+                        <!-- <span aria-hidden="true" class="relative block h-10 w-10">
                             <span class="absolute left-1 top-1 h-4 w-4 -rotate-12 bg-sky-400"></span>
                             <span class="absolute right-1 top-0 h-4 w-4 rotate-45 bg-orange-400"></span>
                             <span class="absolute bottom-1 left-3 h-4 w-4 rotate-45 bg-lime-500"></span>
-                        </span>
+                        </span> -->
                         <span>
-                            <span class="block text-xl font-bold leading-none tracking-tight text-slate-950">Inbizsy</span>
+                            <span class="block text-xl font-bold leading-none tracking-tight text-slate-950">Inbizsys</span>
                             <span class="mt-1 block text-[10px] font-medium uppercase tracking-[0.16em] text-slate-400">Project Workspace</span>
                         </span>
                     </a>

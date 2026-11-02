@@ -2,12 +2,11 @@
     <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
             <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-700">Project tasks</p>
-            <h1 class="break-words text-3xl font-bold tracking-tight">Tasks for {{ $selectedProject->name }}</h1>
+            <h1 class="break-words text-3xl font-bold tracking-tight">Tasks</h1>
             <p class="mt-2 whitespace-pre-line break-words text-slate-600">{{ $selectedProject->description }}</p>
             <p class="mt-3 text-sm font-medium text-indigo-700">{{ $selectedProject->tasks->where('is_completed', true)->count() }} / {{ $selectedProject->tasks->count() }} tasks completed</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="{{ route('backups.index') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">← Back</a>
             <button type="button" wire:click="startCreatingTask" wire:loading.attr="disabled" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50">+ New Task</button>
         </div>
     </div>
@@ -71,7 +70,6 @@
             <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
                 <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>
-                        <th scope="col" class="px-6 py-4">Project</th>
                         <th scope="col" class="px-6 py-4">Task</th>
                         <th scope="col" class="px-6 py-4">Status</th>
                         <th scope="col" class="px-6 py-4 text-right">Actions</th>
@@ -80,7 +78,6 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($selectedProject->tasks as $task)
                         <tr wire:key="task-{{ $task->id }}" class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-semibold text-indigo-700">{{ $selectedProject->name }}</td>
                             <td class="px-6 py-4">
                                 <label for="task-completed-{{ $task->id }}" @class(['block break-words font-medium', 'line-through text-slate-500' => $task->is_completed])>{{ $task->title }}</label>
                             </td>
@@ -92,14 +89,23 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex justify-end gap-2">
-                                    <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" title="Edit task" class="grid h-8 w-8 place-items-center rounded-md bg-indigo-100/70 text-indigo-500 transition hover:bg-indigo-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"><svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5H3a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1v-6" /><path d="m16 3 5 5M9 13l-1 5 5-1L23 7a2 2 0 0 0 0-3l-2-2a2 2 0 0 0-3 0Z" /></svg></button>
-                                    <button type="button" wire:click="confirmDeleteTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" title="Delete task" class="grid h-8 w-8 place-items-center rounded-md bg-red-100/70 text-red-500 transition hover:bg-red-200 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50"><svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5 6l1 14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-14M10 10v7M14 10v7" /></svg></button>
+                                    <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" title="Edit task" class="grid h-8 w-8 place-items-center rounded-md bg-indigo-100/70 text-indigo-500 transition hover:bg-indigo-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50">
+                                        <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M13 5H3a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1v-6" />
+                                            <path d="m16 3 5 5M9 13l-1 5 5-1L23 7a2 2 0 0 0 0-3l-2-2a2 2 0 0 0-3 0Z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" wire:click="confirmDeleteTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" title="Delete task" class="grid h-8 w-8 place-items-center rounded-md bg-red-100/70 text-red-500 transition hover:bg-red-200 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50">
+                                        <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5 6l1 14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-14M10 10v7M14 10v7" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-sm text-slate-600">No tasks yet. Add the first task above.</td>
+                            <td colspan="3" class="px-6 py-12 text-center text-sm text-slate-600">No tasks yet. Add the first task above.</td>
                         </tr>
                     @endforelse
                 </tbody>

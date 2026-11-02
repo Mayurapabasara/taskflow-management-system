@@ -25,15 +25,4 @@
         cursor: text;
     }
 
-    progress::-webkit-progress-bar {
-        @apply rounded-full bg-slate-100;
-    }
-
-    progress::-webkit-progress-value {
-        @apply rounded-full bg-indigo-600;
-    }
-
-    progress::-moz-progress-bar {
-        @apply rounded-full bg-indigo-600;
-    }
 }

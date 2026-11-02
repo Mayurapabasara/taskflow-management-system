@@ -156,17 +156,17 @@ class TasksTest extends TestCase
         $task = $project->tasks()->create(['title' => 'Toggle this task']);
 
         $component = Livewire::test(ProjectTasks::class, ['project' => $project])
-            ->assertSee('0 / 1 tasks completed')->assertSee('0%')
+            ->assertSee('0 / 1 tasks completed')->assertDontSee('%')
             ->assertDontSee('line-through');
         $this->assertCheckboxState($component->html(), $task->id, false);
 
         $component->call('toggleTask', $task->id)->assertHasNoErrors()
-            ->assertSee('1 / 1 tasks completed')->assertSee('100%')->assertSee('line-through');
+            ->assertSee('1 / 1 tasks completed')->assertDontSee('%')->assertSee('line-through');
         $this->assertTrue($task->fresh()->is_completed);
         $this->assertCheckboxState($component->html(), $task->id, true);
 
         $component->call('toggleTask', $task->id)->assertHasNoErrors()
-            ->assertSee('0 / 1 tasks completed')->assertSee('0%')->assertDontSee('line-through');
+            ->assertSee('0 / 1 tasks completed')->assertDontSee('%')->assertDontSee('line-through');
         $this->assertFalse($task->fresh()->is_completed);
         $this->assertCheckboxState($component->html(), $task->id, false);
     }
@@ -209,12 +209,12 @@ class TasksTest extends TestCase
         $first = $project->tasks()->where('title', 'First')->firstOrFail();
         $second = $project->tasks()->where('title', 'Second')->firstOrFail();
 
-        $component->call('toggleTask', $first->id)->assertSee('1 / 2 tasks completed')->assertSee('50%')
+        $component->call('toggleTask', $first->id)->assertSee('1 / 2 tasks completed')->assertDontSee('%')
             ->call('editTask', $first->id)->set('taskTitle', 'Renamed')->call('saveTask')
-            ->assertSee('1 / 2 tasks completed')->assertSee('50%')
-            ->call('deleteTask', $first->id)->assertSee('0 / 1 tasks completed')->assertSee('0%')
-            ->call('toggleTask', $second->id)->assertSee('1 / 1 tasks completed')->assertSee('100%')
-            ->call('deleteTask', $second->id)->assertSee('0 / 0 tasks completed')->assertSee('0%');
+            ->assertSee('1 / 2 tasks completed')->assertDontSee('%')
+            ->call('deleteTask', $first->id)->assertSee('0 / 1 tasks completed')->assertDontSee('%')
+            ->call('toggleTask', $second->id)->assertSee('1 / 1 tasks completed')->assertDontSee('%')
+            ->call('deleteTask', $second->id)->assertSee('0 / 0 tasks completed')->assertDontSee('%');
 
         $this->assertDatabaseCount('tasks', 0);
     }
