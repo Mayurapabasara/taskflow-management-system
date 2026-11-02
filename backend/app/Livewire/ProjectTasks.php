@@ -21,6 +21,8 @@ class ProjectTasks extends Component
 
     public string $assignedTo = '';
 
+    public bool $showTaskForm = false;
+
     public function mount(Project $project): void
     {
         $this->selectedProjectId = $project->id;
@@ -48,6 +50,12 @@ class ProjectTasks extends Component
         session()->flash('status', 'Task saved.');
     }
 
+    public function startCreatingTask(): void
+    {
+        $this->cancelTask();
+        $this->showTaskForm = true;
+    }
+
     public function editTask(int $id): void
     {
         $task = Project::findOrFail($this->selectedProjectId)->tasks()->findOrFail($id);
@@ -55,11 +63,12 @@ class ProjectTasks extends Component
         $this->editingTaskId = $task->id;
         $this->taskTitle = $task->title;
         $this->assignedTo = $task->assigned_to === null ? '' : (string) $task->assigned_to;
+        $this->showTaskForm = true;
     }
 
     public function cancelTask(): void
     {
-        $this->reset('editingTaskId', 'taskTitle', 'assignedTo');
+        $this->reset('editingTaskId', 'taskTitle', 'assignedTo', 'showTaskForm');
         $this->resetValidation(['taskTitle', 'assignedTo']);
     }
 

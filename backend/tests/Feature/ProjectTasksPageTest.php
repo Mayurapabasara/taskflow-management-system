@@ -20,7 +20,7 @@ class ProjectTasksPageTest extends TestCase
             ->assertDontSee('Build homepage');
         $this->get(route('projects.tasks', $project))->assertOk()
             ->assertSeeLivewire(ProjectTasks::class)->assertSee('Website')
-            ->assertSee('Build homepage')->assertSee('Back to projects');
+            ->assertSee('Build homepage')->assertSee('← Back')->assertSee('+ New Task');
     }
 
     public function test_missing_project_task_page_returns_not_found(): void
