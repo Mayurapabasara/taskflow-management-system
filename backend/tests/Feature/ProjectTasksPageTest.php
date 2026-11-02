@@ -11,12 +11,12 @@ class ProjectTasksPageTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_projects_link_to_a_separate_task_page(): void
+    public function test_task_page_renders_for_a_project(): void
     {
         $project = Project::create(['name' => 'Website', 'description' => 'Launch the website']);
         $project->tasks()->create(['title' => 'Build homepage']);
         $this->get(route('backups.index'))->assertOk()
-            ->assertSee(route('projects.tasks', $project), false)
+            ->assertDontSee(route('projects.tasks', $project), false)
             ->assertDontSee('Build homepage');
         $this->get(route('projects.tasks', $project))->assertOk()
             ->assertSeeLivewire(ProjectTasks::class)->assertSee('Website')

@@ -4,31 +4,49 @@ namespace Tests\Feature;
 
 use App\Livewire\BackupManager;
 use App\Models\Project;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class BackupManagerPageTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_backup_manager_lists_projects_and_links_to_project_creation(): void
+    public function test_landing_page_lists_project_details_with_edit_and_delete_actions(): void
     {
         $project = Project::create(['name' => 'Nightly backup', 'description' => 'Protect production data']);
-        $assignee = User::factory()->create(['name' => 'Database administrator']);
-        $project->tasks()->create(['title' => 'Verify restoration', 'is_completed' => true, 'assigned_to' => $assignee->id]);
+        $project->tasks()->create(['title' => 'Verify restoration', 'is_completed' => true]);
         $project->tasks()->create(['title' => 'Review retention']);
+        $inactive = Project::create(['name' => 'Archived project', 'description' => 'Paused', 'is_active' => false]);
 
         $this->get('/')
             ->assertOk()
             ->assertSeeLivewire(BackupManager::class)
             ->assertSee('Nightly backup')
-            ->assertSee('Database administrator')
-            ->assertSee('Not configured')
+            ->assertSee('2')
+            ->assertSee('1')
+            ->assertSee('Active')
+            ->assertSee('Inactive')
             ->assertSee(route('projects.index').'#project-form', false)
-            ->assertSee('Download backup, coming soon')
-            ->assertSee('Assign tasks for Nightly backup')
-            ->assertSee(route('projects.tasks', $project), false);
+            ->assertSee(route('projects.index', ['edit' => $project->id]).'#project-form', false)
+            ->assertSee('Edit')
+            ->assertSee('Delete')
+            ->assertDontSee('Backup Manager')
+            ->assertDontSee('Database')
+            ->assertDontSee('Host')
+            ->assertDontSee('Port');
+
+        $this->assertModelExists($inactive);
+    }
+
+    public function test_landing_page_delete_action_removes_a_project_without_tasks(): void
+    {
+        $project = Project::create(['name' => 'Remove', 'description' => 'Unused']);
+
+        Livewire::test(BackupManager::class)->call('delete', $project->id)
+            ->assertHasNoErrors()->assertSee('Project deleted.');
+
+        $this->assertModelMissing($project);
     }
 
     public function test_backup_manager_shows_an_empty_state_when_no_projects_exist(): void

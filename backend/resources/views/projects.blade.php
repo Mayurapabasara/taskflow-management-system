@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ isset($project) ? $project->name.' · Tasks' : (isset($backupManager) ? 'Backup Manager' : 'Projects') }} · TaskFlow</title>
+        <title>{{ isset($project) ? $project->name.' · Tasks' : 'Projects' }} · TaskFlow</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
