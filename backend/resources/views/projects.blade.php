@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Projects · TaskFlow</title>
+        <title>{{ isset($project) ? $project->name.' · Tasks' : 'Projects' }} · TaskFlow</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
@@ -15,7 +15,11 @@
             </div>
         </header>
         <main id="main-content" tabindex="-1" class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-            <livewire:projects />
+            @isset($project)
+                <livewire:project-tasks :project="$project" />
+            @else
+                <livewire:projects />
+            @endisset
         </main>
         @livewireScripts
     </body>

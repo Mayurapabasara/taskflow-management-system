@@ -56,10 +56,7 @@
 
         <section class="grid gap-4 sm:grid-cols-2 lg:col-span-2" aria-label="Project list">
             @forelse ($projects as $project)
-                <article wire:key="project-{{ $project->id }}" @class(['flex min-w-0 flex-col rounded-xl border bg-white p-6 shadow-sm', 'border-indigo-400 ring-2 ring-indigo-100' => $selectedProjectId === $project->id, 'border-slate-200' => $selectedProjectId !== $project->id])>
-                    @if ($selectedProjectId === $project->id)
-                        <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-indigo-700">Selected project</p>
-                    @endif
+                <article wire:key="project-{{ $project->id }}" class="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <h2 class="break-words text-xl font-semibold">{{ $project->name }}</h2>
                     <p class="mt-2 whitespace-pre-line break-words text-sm leading-6 text-slate-600">{{ $project->description }}</p>
                     <div class="mt-5 flex items-center justify-between gap-3 text-sm text-slate-600">
@@ -68,7 +65,7 @@
                     </div>
                     <progress aria-label="Task progress for {{ $project->name }}" value="{{ $project->completed_tasks_count }}" max="{{ max(1, $project->tasks_count) }}" class="mt-2 h-2 w-full overflow-hidden rounded-full accent-indigo-600"></progress>
                     <div class="mt-auto flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                        <button type="button" wire:click="selectProject({{ $project->id }})" wire:loading.attr="disabled" aria-pressed="{{ $selectedProjectId === $project->id ? 'true' : 'false' }}" class="rounded-lg bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">Tasks</button>
+                        <a href="{{ route('projects.tasks', $project) }}" class="rounded-lg bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100">Manage tasks</a>
                         <button type="button" wire:click="edit({{ $project->id }})" wire:loading.attr="disabled" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-50" aria-label="Edit {{ $project->name }}">Edit</button>
                         <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" class="rounded-lg px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50" aria-label="Delete {{ $project->name }}">Delete</button>
                     </div>
@@ -82,40 +79,4 @@
         </section>
     </div>
 
-    @if ($selectedProject)
-        <section wire:key="tasks-{{ $selectedProject->id }}" class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="tasks-heading">
-            <h2 id="tasks-heading" class="break-words text-xl font-semibold">Tasks for {{ $selectedProject->name }}</h2>
-            <p class="mt-2 text-sm text-slate-600">Check a task to mark it complete. Changes are saved automatically.</p>
-            <form wire:submit="saveTask" class="mt-5 space-y-3">
-                <label for="task-title" class="block text-sm font-medium">{{ $editingTaskId ? 'Edit task title' : 'New task title' }}</label>
-                <input id="task-title" type="text" wire:model="taskTitle" maxlength="255" required aria-describedby="task-title-error" aria-invalid="{{ $errors->has('taskTitle') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                <p id="task-title-error" aria-live="polite" class="text-sm text-red-700">@error('taskTitle') {{ $message }} @enderror</p>
-                <div class="flex gap-3">
-                    <button type="submit" wire:loading.attr="disabled" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"><span wire:loading.remove wire:target="saveTask">{{ $editingTaskId ? 'Save task' : 'Add task' }}</span><span wire:loading wire:target="saveTask">Saving…</span></button>
-                    @if ($editingTaskId)
-                        <button type="button" wire:click="cancelTask" class="rounded-lg border border-slate-300 px-4 py-2 text-sm">Cancel</button>
-                    @endif
-                </div>
-            </form>
-            <ul class="mt-6 divide-y divide-slate-200">
-                @forelse ($selectedProject->tasks as $task)
-                    <li wire:key="task-{{ $task->id }}" class="flex flex-wrap items-center justify-between gap-3 py-4">
-                        <input id="task-completed-{{ $task->id }}" type="checkbox" wire:click="toggleTask({{ $task->id }})" @checked($task->is_completed) wire:loading.attr="disabled" class="h-5 w-5 rounded accent-indigo-600 disabled:opacity-50">
-                        <label for="task-completed-{{ $task->id }}" @class(['min-w-0 flex-1 break-words', 'line-through text-slate-500' => $task->is_completed])>{{ $task->title }}</label>
-                        <div class="flex gap-2">
-                            <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">Edit</button>
-                            <button type="button" wire:click="deleteTask({{ $task->id }})" wire:confirm="Delete this task? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" class="rounded-lg px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50">Delete</button>
-                        </div>
-                    </li>
-                @empty
-                    <li class="py-6 text-sm text-slate-600">No tasks yet. Add the first task above.</li>
-                @endforelse
-            </ul>
-        </section>
-    @else
-        <section class="mt-8 rounded-xl border border-dashed border-slate-300 px-6 py-10 text-center" aria-label="Task list">
-            <h2 class="text-lg font-semibold">Your tasks, in focus</h2>
-            <p class="mt-2 text-sm text-slate-600">Select Tasks on a project to view and manage its task list.</p>
-        </section>
-    @endif
 </div>
