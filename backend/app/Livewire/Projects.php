@@ -18,6 +18,8 @@ class Projects extends Component
 
     public string $description = '';
 
+    public bool $isActive = true;
+
     public function save(): void
     {
         $this->name = trim($this->name);
@@ -26,13 +28,20 @@ class Projects extends Component
         $data = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:10000'],
+            'isActive' => ['boolean'],
         ]);
 
+        $projectData = [
+            'name' => $data['name'],
+            'description' => $data['description'],
+            'is_active' => $data['isActive'],
+        ];
+
         if ($this->editingId !== null) {
-            Project::findOrFail($this->editingId)->update($data);
+            Project::findOrFail($this->editingId)->update($projectData);
             $message = 'Project updated.';
         } else {
-            Project::create($data);
+            Project::create($projectData);
             $message = 'Project created.';
         }
 
@@ -47,11 +56,12 @@ class Projects extends Component
         $this->editingId = $project->id;
         $this->name = $project->name;
         $this->description = $project->description;
+        $this->isActive = $project->is_active;
     }
 
     public function cancel(): void
     {
-        $this->reset('editingId', 'name', 'description');
+        $this->reset('editingId', 'name', 'description', 'isActive');
         $this->resetValidation();
     }
 
