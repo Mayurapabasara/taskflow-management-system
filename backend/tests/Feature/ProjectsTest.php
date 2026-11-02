@@ -14,12 +14,14 @@ class ProjectsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_project_page_renders_the_component_and_empty_state(): void
+    public function test_project_page_renders_the_component_and_creation_form(): void
     {
         $this->get(route('projects.index'))
             ->assertOk()
             ->assertSeeLivewire(Projects::class)
-            ->assertSee('No projects yet');
+            ->assertSee('New Project')
+            ->assertSee('Project details')
+            ->assertSee('Create project');
     }
 
     public function test_projects_can_be_created_with_trimmed_input(): void
@@ -31,8 +33,7 @@ class ProjectsTest extends TestCase
             ->assertHasNoErrors()
             ->assertSet('name', '')
             ->assertSet('description', '')
-            ->assertSee('Project created.')
-            ->assertSee('Assessment');
+            ->assertSee('Project created.');
 
         $this->assertDatabaseHas('projects', ['name' => 'Assessment', 'description' => 'Build TaskFlow.']);
     }
@@ -98,7 +99,7 @@ class ProjectsTest extends TestCase
         $this->assertSame('Assessment', $project->fresh()->name);
     }
 
-    public function test_project_list_shows_counts_scoped_to_each_project(): void
+    public function test_project_page_hides_existing_project_details(): void
     {
         $project = $this->project();
         $project->tasks()->create(['title' => 'Done', 'is_completed' => true]);
@@ -107,11 +108,10 @@ class ProjectsTest extends TestCase
         $other->tasks()->create(['title' => 'Other pending']);
 
         Livewire::test(Projects::class)
-            ->assertSee('Assessment')
-            ->assertSee('Project description')
-            ->assertSee('1 / 2 tasks completed')
-            ->assertSee('50%')
-            ->assertSee('0 / 1 tasks completed');
+            ->assertSee('New Project')
+            ->assertDontSee('Assessment')
+            ->assertDontSee('Other')
+            ->assertDontSee('1 / 2 tasks completed');
     }
 
     public function test_deleting_a_project_resets_its_edit_form_and_preserves_other_projects(): void
@@ -132,12 +132,12 @@ class ProjectsTest extends TestCase
         $this->assertDatabaseCount('tasks', 0);
     }
 
-    public function test_project_content_is_escaped(): void
+    public function test_project_page_does_not_render_existing_project_content(): void
     {
         $this->project('<script>alert(1)</script>');
 
         Livewire::test(Projects::class)
-            ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
+            ->assertDontSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert(1)</script>', false);
     }
 

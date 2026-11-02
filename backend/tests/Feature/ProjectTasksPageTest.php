@@ -15,7 +15,7 @@ class ProjectTasksPageTest extends TestCase
     {
         $project = Project::create(['name' => 'Website', 'description' => 'Launch the website']);
         $project->tasks()->create(['title' => 'Build homepage']);
-        $this->get(route('projects.index'))->assertOk()
+        $this->get(route('backups.index'))->assertOk()
             ->assertSee(route('projects.tasks', $project), false)
             ->assertDontSee('Build homepage');
         $this->get(route('projects.tasks', $project))->assertOk()
