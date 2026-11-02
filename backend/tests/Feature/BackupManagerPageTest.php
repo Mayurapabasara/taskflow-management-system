@@ -27,7 +27,8 @@ class BackupManagerPageTest extends TestCase
             ->assertSee('Not configured')
             ->assertSee(route('projects.index').'#project-form', false)
             ->assertSee('Download backup, coming soon')
-            ->assertDontSee(route('projects.tasks', $project), false);
+            ->assertSee('Assign tasks for Nightly backup')
+            ->assertSee(route('projects.tasks', $project), false);
     }
 
     public function test_backup_manager_shows_an_empty_state_when_no_projects_exist(): void

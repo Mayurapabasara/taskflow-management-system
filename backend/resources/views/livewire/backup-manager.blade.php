@@ -32,7 +32,7 @@
                                 <div class="flex justify-end gap-2" aria-label="Project actions are not available yet">
                                     <button type="button" disabled title="Download backup (coming soon)" aria-label="Download backup, coming soon" class="grid h-8 w-8 place-items-center rounded-md bg-emerald-100 text-emerald-700 opacity-60">↓</button>
                                     <button type="button" disabled title="Edit backup (coming soon)" aria-label="Edit backup, coming soon" class="grid h-8 w-8 place-items-center rounded-md bg-indigo-100 text-indigo-700 opacity-60">✎</button>
-                                    <button type="button" disabled title="View backup (coming soon)" aria-label="View backup, coming soon" class="grid h-8 w-8 place-items-center rounded-md bg-sky-100 text-sky-700 opacity-60">◉</button>
+                                    <a href="{{ route('projects.tasks', $project) }}" title="Assign tasks" aria-label="Assign tasks for {{ $project->name }}" class="grid h-8 w-8 place-items-center rounded-md bg-sky-100 text-sky-700 hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400">◉</a>
                                     <button type="button" disabled title="Delete backup (coming soon)" aria-label="Delete backup, coming soon" class="grid h-8 w-8 place-items-center rounded-md bg-red-100 text-red-700 opacity-60">⌫</button>
                                 </div>
                             </td>
