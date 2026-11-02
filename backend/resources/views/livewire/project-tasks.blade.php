@@ -28,17 +28,19 @@
                     <input id="task-title" type="text" wire:model="taskTitle" maxlength="255" required aria-describedby="task-title-error" aria-invalid="{{ $errors->has('taskTitle') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
                     <p id="task-title-error" aria-live="polite" class="mt-1 text-sm text-red-700">@error('taskTitle') {{ $message }} @enderror</p>
                 </div>
-                <div>
-                    <label for="task-assignee" class="mb-2 block text-sm font-medium">Assign to</label>
-                    <select id="task-assignee" wire:model="assignedTo" aria-describedby="task-assignee-error" aria-invalid="{{ $errors->has('assignedTo') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                        <option value="">Unassigned</option>
-                        @foreach ($users as $user)
-                            <option wire:key="assignee-{{ $user->id }}" value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                        @endforeach
-                    </select>
-                    <p id="task-assignee-error" aria-live="polite" class="mt-1 text-sm text-red-700">@error('assignedTo') {{ $message }} @enderror</p>
-                </div>
-                @if ($users->isEmpty())
+                @if (! $editingTaskId)
+                    <div>
+                        <label for="task-assignee" class="mb-2 block text-sm font-medium">Assign to</label>
+                        <select id="task-assignee" wire:model="assignedTo" aria-describedby="task-assignee-error" aria-invalid="{{ $errors->has('assignedTo') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                            <option value="">Unassigned</option>
+                            @foreach ($users as $user)
+                                <option wire:key="assignee-{{ $user->id }}" value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            @endforeach
+                        </select>
+                        <p id="task-assignee-error" aria-live="polite" class="mt-1 text-sm text-red-700">@error('assignedTo') {{ $message }} @enderror</p>
+                    </div>
+                @endif
+                @if (! $editingTaskId && $users->isEmpty())
                     <p class="text-sm text-slate-600 sm:col-span-2">No team members are available yet. You can save the task as unassigned.</p>
                 @endif
                 <div class="flex gap-3 sm:col-span-2">

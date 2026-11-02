@@ -13,11 +13,10 @@ class TaskAssignmentTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_task_can_be_assigned_reassigned_and_unassigned(): void
+    public function test_task_assignment_is_preserved_when_the_task_title_is_edited(): void
     {
         $project = Project::create(['name' => 'Website', 'description' => 'Launch']);
         $first = User::factory()->create(['name' => 'First member']);
-        $second = User::factory()->create(['name' => 'Second member']);
         $component = Livewire::test(ProjectTasks::class, ['project' => $project])
             ->set('taskTitle', 'Build homepage')->set('assignedTo', (string) $first->id)
             ->call('saveTask')->assertHasNoErrors()->assertSet('assignedTo', '');
@@ -25,12 +24,11 @@ class TaskAssignmentTest extends TestCase
         $this->assertSame($first->id, $task->assignee->id);
 
         $component->call('editTask', $task->id)->assertSet('assignedTo', (string) $first->id)
-            ->set('assignedTo', (string) $second->id)->call('saveTask')->assertHasNoErrors();
-        $this->assertSame($second->id, $task->fresh()->assignee->id);
+            ->assertDontSee('Assign to')
+            ->set('taskTitle', 'Updated homepage')->call('saveTask')->assertHasNoErrors();
+        $this->assertSame($first->id, $task->fresh()->assignee->id);
 
-        $component->call('editTask', $task->id)->set('assignedTo', '')->call('saveTask')
-            ->assertHasNoErrors();
-        $this->assertNull($task->fresh()->assigned_to);
+        $this->assertSame('Updated homepage', $task->fresh()->title);
     }
 
     public function test_invalid_assignees_do_not_change_saved_tasks(): void
@@ -41,8 +39,6 @@ class TaskAssignmentTest extends TestCase
         $component = Livewire::test(ProjectTasks::class, ['project' => $project]);
         foreach (['999999', 'invalid'] as $value) {
             $component->set('taskTitle', 'New task')->set('assignedTo', $value)
-                ->call('saveTask')->assertHasErrors('assignedTo');
-            $component->call('editTask', $task->id)->set('assignedTo', $value)
                 ->call('saveTask')->assertHasErrors('assignedTo');
         }
         $this->assertDatabaseCount('tasks', 1);
