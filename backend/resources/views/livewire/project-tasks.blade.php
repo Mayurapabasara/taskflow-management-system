@@ -56,7 +56,6 @@
                     <tr>
                         <th scope="col" class="px-6 py-4">Project</th>
                         <th scope="col" class="px-6 py-4">Task</th>
-                        <th scope="col" class="px-6 py-4">Assigned to</th>
                         <th scope="col" class="px-6 py-4">Status</th>
                         <th scope="col" class="px-6 py-4 text-right">Actions</th>
                     </tr>
@@ -68,7 +67,6 @@
                             <td class="px-6 py-4">
                                 <label for="task-completed-{{ $task->id }}" @class(['block break-words font-medium', 'line-through text-slate-500' => $task->is_completed])>{{ $task->title }}</label>
                             </td>
-                            <td class="px-6 py-4 text-slate-600">{{ $task->assignee?->name ?? 'Unassigned' }}</td>
                             <td class="px-6 py-4">
                                 <label class="inline-flex cursor-pointer items-center gap-2">
                                     <input id="task-completed-{{ $task->id }}" type="checkbox" wire:click="toggleTask({{ $task->id }})" @checked($task->is_completed) wire:loading.attr="disabled" class="h-4 w-4 rounded accent-indigo-600 disabled:opacity-50">

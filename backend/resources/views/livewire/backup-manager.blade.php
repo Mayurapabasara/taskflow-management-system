@@ -69,6 +69,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex justify-end gap-2">
+                                    <a href="{{ route('projects.tasks', $project) }}" class="rounded-lg bg-sky-100 px-3 py-2 text-sm font-medium text-sky-700 hover:bg-sky-200">Tasks</a>
                                     <button type="button" wire:click="edit({{ $project->id }})" class="rounded-lg bg-indigo-100 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200">Edit</button>
                                     <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete {{ $project->name }}" class="rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200 disabled:opacity-50">Delete</button>
                                 </div>

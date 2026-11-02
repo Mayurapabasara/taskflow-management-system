@@ -29,7 +29,7 @@ class TaskAssignmentTest extends TestCase
         $this->assertSame($second->id, $task->fresh()->assignee->id);
 
         $component->call('editTask', $task->id)->set('assignedTo', '')->call('saveTask')
-            ->assertHasNoErrors()->assertSee('Unassigned');
+            ->assertHasNoErrors();
         $this->assertNull($task->fresh()->assigned_to);
     }
 
