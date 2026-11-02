@@ -24,7 +24,7 @@
     @enderror
 
     <div class="grid items-start gap-8 lg:grid-cols-3">
-        <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="project-form-title">
+        <section id="project-form" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="project-form-title">
             <h2 id="project-form-title" class="text-lg font-semibold">{{ $editingId ? 'Edit project' : 'New project' }}</h2>
             <p class="mb-5 mt-1 text-sm text-slate-600">Give your project a name and a clear description. All fields are required.</p>
             <form wire:submit="save" class="space-y-5">
