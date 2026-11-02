@@ -27,8 +27,7 @@ class BackupManagerPageTest extends TestCase
             ->assertSee('1')
             ->assertSee('Active')
             ->assertSee('Inactive')
-            ->assertSee(route('projects.index').'#project-form', false)
-            ->assertSee(route('projects.index', ['edit' => $project->id]).'#project-form', false)
+            ->assertSee('+ Add Project')
             ->assertSee('Edit')
             ->assertSee('Delete')
             ->assertDontSee('Backup Manager')
@@ -37,6 +36,34 @@ class BackupManagerPageTest extends TestCase
             ->assertDontSee('Port');
 
         $this->assertModelExists($inactive);
+    }
+
+    public function test_add_and_edit_actions_open_a_project_popup(): void
+    {
+        $project = Project::create(['name' => 'Existing', 'description' => 'Original']);
+
+        $component = Livewire::test(BackupManager::class)
+            ->call('startCreatingProject')
+            ->assertSet('showProjectForm', true)
+            ->assertSee('New Project')
+            ->set('name', 'Created in popup')
+            ->set('description', 'Created without leaving the landing page')
+            ->call('saveProject')
+            ->assertHasNoErrors()
+            ->assertSet('showProjectForm', false)
+            ->assertSee('Project created.');
+
+        $component->call('edit', $project->id)
+            ->assertSet('showProjectForm', true)
+            ->assertSet('editingId', $project->id)
+            ->assertSet('name', 'Existing')
+            ->set('name', 'Updated in popup')
+            ->call('saveProject')
+            ->assertHasNoErrors()
+            ->assertSee('Project updated.');
+
+        $this->assertDatabaseHas('projects', ['name' => 'Created in popup']);
+        $this->assertDatabaseHas('projects', ['id' => $project->id, 'name' => 'Updated in popup']);
     }
 
     public function test_landing_page_delete_action_removes_a_project_without_tasks(): void

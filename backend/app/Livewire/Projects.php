@@ -20,15 +20,6 @@ class Projects extends Component
 
     public bool $isActive = true;
 
-    public function mount(): void
-    {
-        $editingId = request()->integer('edit');
-
-        if ($editingId > 0) {
-            $this->edit($editingId);
-        }
-    }
-
     public function save(): void
     {
         $this->name = trim($this->name);
