@@ -88,12 +88,13 @@
                                 </label>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="action-group">
-                                    <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" title="Edit task" class="action-button action-button--edit">
-                                        <img src="{{ asset('icons/edit.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" title="Edit task" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-[background-color,box-shadow] duration-150 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 bg-[#eeebff] hover:bg-[#e1dcff]">
+                                        <img src="{{ asset('icons/edit.svg') }}" class="h-5 w-5" alt="" aria-hidden="true">
                                     </button>
-                                    <button type="button" wire:click="confirmDeleteTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" title="Delete task" class="action-button action-button--delete">
-                                        <img src="{{ asset('icons/trash.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
+                                    <span aria-hidden="true" class="pointer-events-none h-6 w-px shrink-0 bg-[#d9dee7]"></span>
+                                    <button type="button" wire:click="confirmDeleteTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" title="Delete task" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-[background-color,box-shadow] duration-150 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 bg-[#ffe7e9] hover:bg-[#ffd5da]">
+                                        <img src="{{ asset('icons/trash.svg') }}" class="h-5 w-5" alt="" aria-hidden="true">
                                     </button>
                                 </div>
                             </td>

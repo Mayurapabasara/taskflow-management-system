@@ -68,17 +68,19 @@
                                 <span @class(['rounded-full px-3 py-1 text-xs font-semibold', 'bg-emerald-100 text-emerald-700' => $project->is_active, 'bg-slate-100 text-slate-600' => ! $project->is_active])>{{ $project->is_active ? 'Active' : 'Inactive' }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="action-group">
-                                    <button type="button" wire:click="edit({{ $project->id }})" title="Edit project" aria-label="Edit {{ $project->name }}" class="action-button action-button--edit">
-                                        <img src="{{ asset('icons/edit.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button type="button" wire:click="edit({{ $project->id }})" title="Edit project" aria-label="Edit {{ $project->name }}" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-[background-color,box-shadow] duration-150 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 bg-[#eeebff] hover:bg-[#e1dcff]">
+                                        <img src="{{ asset('icons/edit.svg') }}" class="h-5 w-5" alt="" aria-hidden="true">
                                         <span class="sr-only">Edit</span>
                                     </button>
-                                    <a href="{{ route('projects.tasks', $project) }}" title="Open tasks" aria-label="Open tasks for {{ $project->name }}" class="action-button action-button--tasks">
-                                        <img src="{{ asset('icons/clock.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
+                                    <span aria-hidden="true" class="pointer-events-none h-6 w-px shrink-0 bg-[#d9dee7]"></span>
+                                    <a href="{{ route('projects.tasks', $project) }}" title="Open tasks" aria-label="Open tasks for {{ $project->name }}" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-[background-color,box-shadow] duration-150 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 bg-[#e4f0ff] hover:bg-[#d2e6ff]">
+                                        <img src="{{ asset('icons/clock.svg') }}" class="h-5 w-5" alt="" aria-hidden="true">
                                         <span class="sr-only">Tasks</span>
                                     </a>
-                                    <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" title="Delete project" aria-label="Delete {{ $project->name }}" class="action-button action-button--delete">
-                                        <img src="{{ asset('icons/trash.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
+                                    <span aria-hidden="true" class="pointer-events-none h-6 w-px shrink-0 bg-[#d9dee7]"></span>
+                                    <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" title="Delete project" aria-label="Delete {{ $project->name }}" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-[background-color,box-shadow] duration-150 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 bg-[#ffe7e9] hover:bg-[#ffd5da]">
+                                        <img src="{{ asset('icons/trash.svg') }}" class="h-5 w-5" alt="" aria-hidden="true">
                                         <span class="sr-only">Delete</span>
                                     </button>
                                 </div>
