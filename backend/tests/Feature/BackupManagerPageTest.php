@@ -17,13 +17,14 @@ class BackupManagerPageTest extends TestCase
         $project->tasks()->create(['title' => 'Verify restoration', 'is_completed' => true]);
         $project->tasks()->create(['title' => 'Review retention']);
 
-        $this->get(route('backups.index'))
+        $this->get('/')
             ->assertOk()
             ->assertSeeLivewire(BackupManager::class)
             ->assertSee('Nightly backup')
             ->assertSee('Protect production data')
             ->assertSee('1 / 2 tasks')
             ->assertSee(route('projects.index').'#project-form', false)
+            ->assertSee('Assign tasks')
             ->assertSee(route('projects.tasks', $project), false);
     }
 

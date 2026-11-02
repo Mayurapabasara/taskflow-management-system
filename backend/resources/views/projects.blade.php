@@ -12,8 +12,8 @@
         <header class="border-b border-slate-200 bg-white">
             <div class="mx-auto max-w-6xl px-4 py-5 sm:px-6">
                 <div class="flex items-center justify-between gap-4">
-                    <a href="{{ route('projects.index') }}" class="inline-flex items-center gap-3 text-xl font-bold tracking-tight text-indigo-700"><span aria-hidden="true" class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 text-sm text-white">TF</span>TaskFlow</a>
-                    <a href="{{ route('backups.index') }}" class="text-sm font-medium text-slate-600 hover:text-indigo-700">Backup Manager</a>
+                    <a href="{{ route('backups.index') }}" class="inline-flex items-center gap-3 text-xl font-bold tracking-tight text-indigo-700"><span aria-hidden="true" class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 text-sm text-white">TF</span>TaskFlow</a>
+                    <a href="{{ route('projects.index') }}" class="text-sm font-medium text-slate-600 hover:text-indigo-700">Projects</a>
                 </div>
             </div>
         </header>

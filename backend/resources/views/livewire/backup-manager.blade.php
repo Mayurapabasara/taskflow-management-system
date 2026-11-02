@@ -26,7 +26,7 @@
                             <td class="px-6 py-4 font-semibold text-slate-900">{{ $project->name }}</td>
                             <td class="max-w-md px-6 py-4 text-slate-600">{{ \Illuminate\Support\Str::limit($project->description, 100) }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $project->completed_tasks_count }} / {{ $project->tasks_count }} tasks</td>
-                            <td class="px-6 py-4 text-right"><a href="{{ route('projects.tasks', $project) }}" class="font-medium text-indigo-700 hover:underline">Manage tasks</a></td>
+                            <td class="px-6 py-4 text-right"><a href="{{ route('projects.tasks', $project) }}" class="font-medium text-indigo-700 hover:underline">Assign tasks</a></td>
                         </tr>
                     @empty
                         <tr>
