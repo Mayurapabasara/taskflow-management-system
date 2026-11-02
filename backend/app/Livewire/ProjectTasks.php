@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
@@ -18,6 +19,8 @@ class ProjectTasks extends Component
 
     public string $taskTitle = '';
 
+    public string $assignedTo = '';
+
     public function mount(Project $project): void
     {
         $this->selectedProjectId = $project->id;
@@ -26,15 +29,18 @@ class ProjectTasks extends Component
     public function saveTask(): void
     {
         $this->taskTitle = trim($this->taskTitle);
-        $this->validate(['taskTitle' => ['required', 'string', 'max:255']], [], ['taskTitle' => 'title']);
+        $this->validate([
+            'taskTitle' => ['required', 'string', 'max:255'],
+            'assignedTo' => ['nullable', 'integer', 'exists:users,id'],
+        ], [], ['taskTitle' => 'title', 'assignedTo' => 'assignee']);
 
         DB::transaction(function (): void {
             $project = Project::query()->lockForUpdate()->findOrFail($this->selectedProjectId);
 
             if ($this->editingTaskId !== null) {
-                $project->tasks()->findOrFail($this->editingTaskId)->update(['title' => $this->taskTitle]);
+                $project->tasks()->findOrFail($this->editingTaskId)->update(['title' => $this->taskTitle, 'assigned_to' => $this->assignedTo === '' ? null : (int) $this->assignedTo]);
             } else {
-                $project->tasks()->create(['title' => $this->taskTitle]);
+                $project->tasks()->create(['title' => $this->taskTitle, 'assigned_to' => $this->assignedTo === '' ? null : (int) $this->assignedTo]);
             }
         }, attempts: 3);
 
@@ -45,15 +51,16 @@ class ProjectTasks extends Component
     public function editTask(int $id): void
     {
         $task = Project::findOrFail($this->selectedProjectId)->tasks()->findOrFail($id);
-        $this->resetValidation('taskTitle');
+        $this->resetValidation(['taskTitle', 'assignedTo']);
         $this->editingTaskId = $task->id;
         $this->taskTitle = $task->title;
+        $this->assignedTo = $task->assigned_to === null ? '' : (string) $task->assigned_to;
     }
 
     public function cancelTask(): void
     {
-        $this->reset('editingTaskId', 'taskTitle');
-        $this->resetValidation('taskTitle');
+        $this->reset('editingTaskId', 'taskTitle', 'assignedTo');
+        $this->resetValidation(['taskTitle', 'assignedTo']);
     }
 
     public function deleteTask(int $id): void
@@ -82,7 +89,8 @@ class ProjectTasks extends Component
     public function render(): View
     {
         return view('livewire.project-tasks', [
-            'selectedProject' => Project::with(['tasks' => fn ($query) => $query->orderBy('id')])->findOrFail($this->selectedProjectId),
+            'users' => User::query()->orderBy('name')->orderBy('id')->get(['id', 'name', 'email']),
+            'selectedProject' => Project::with(['tasks' => fn ($query) => $query->with('assignee')->orderBy('id')])->findOrFail($this->selectedProjectId),
         ]);
     }
 }

@@ -15,6 +15,17 @@
             <label for="task-title" class="block text-sm font-medium">{{ $editingTaskId ? 'Edit task title' : 'New task title' }}</label>
             <input id="task-title" type="text" wire:model="taskTitle" maxlength="255" required aria-describedby="task-title-error" aria-invalid="{{ $errors->has('taskTitle') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
             <p id="task-title-error" aria-live="polite" class="text-sm text-red-700">@error('taskTitle') {{ $message }} @enderror</p>
+            <label for="task-assignee" class="block text-sm font-medium">Assign to</label>
+            <select id="task-assignee" wire:model="assignedTo" aria-describedby="task-assignee-error" aria-invalid="{{ $errors->has('assignedTo') ? 'true' : 'false' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                <option value="">Unassigned</option>
+                @foreach ($users as $user)
+                    <option wire:key="assignee-{{ $user->id }}" value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                @endforeach
+            </select>
+            <p id="task-assignee-error" aria-live="polite" class="text-sm text-red-700">@error('assignedTo') {{ $message }} @enderror</p>
+            @if ($users->isEmpty())
+                <p class="text-sm text-slate-600">No team members available yet. You can save tasks as unassigned.</p>
+            @endif
             <div class="flex gap-3">
                 <button type="submit" wire:loading.attr="disabled" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"><span wire:loading.remove wire:target="saveTask">{{ $editingTaskId ? 'Save task' : 'Add task' }}</span><span wire:loading wire:target="saveTask">Saving…</span></button>
                 @if ($editingTaskId)
@@ -27,6 +38,7 @@
                 <li wire:key="task-{{ $task->id }}" class="flex flex-wrap items-center justify-between gap-3 py-4">
                     <input id="task-completed-{{ $task->id }}" type="checkbox" wire:click="toggleTask({{ $task->id }})" @checked($task->is_completed) wire:loading.attr="disabled" class="h-5 w-5 rounded accent-indigo-600 disabled:opacity-50">
                     <label for="task-completed-{{ $task->id }}" @class(['min-w-0 flex-1 break-words', 'line-through text-slate-500' => $task->is_completed])>{{ $task->title }}</label>
+                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{{ $task->assignee?->name ?? 'Unassigned' }}</span>
                     <div class="flex gap-2">
                         <button type="button" wire:click="editTask({{ $task->id }})" wire:loading.attr="disabled" aria-label="Edit task {{ $task->title }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50">Edit</button>
                         <button type="button" wire:click="deleteTask({{ $task->id }})" wire:confirm="Delete this task? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete task {{ $task->title }}" class="rounded-lg px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50">Delete</button>
