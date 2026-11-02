@@ -45,11 +45,11 @@
         </div>
     @endif
 
-    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="projects-heading">
+    <section class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_12px_40px_-20px_rgba(100,116,139,0.25)]" aria-labelledby="projects-heading">
         <h1 id="projects-heading" class="sr-only">Projects</h1>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <thead class="bg-white text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th scope="col" class="px-6 py-4">Project</th>
                         <th scope="col" class="px-6 py-4">Number of tasks</th>
@@ -68,25 +68,17 @@
                                 <span @class(['rounded-full px-3 py-1 text-xs font-semibold', 'bg-emerald-100 text-emerald-700' => $project->is_active, 'bg-slate-100 text-slate-600' => ! $project->is_active])>{{ $project->is_active ? 'Active' : 'Inactive' }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex justify-end gap-2">
-                                    <button type="button" wire:click="edit({{ $project->id }})" title="Edit project" aria-label="Edit {{ $project->name }}" class="grid h-8 w-8 place-items-center rounded-md bg-indigo-100/70 text-indigo-500 transition hover:bg-indigo-200 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                                        <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M13 5H3a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h15a1 1 0 0 0 1-1v-6" />
-                                            <path d="m16 3 5 5M9 13l-1 5 5-1L23 7a2 2 0 0 0 0-3l-2-2a2 2 0 0 0-3 0Z" />
-                                        </svg>
+                                <div class="action-group">
+                                    <button type="button" wire:click="edit({{ $project->id }})" title="Edit project" aria-label="Edit {{ $project->name }}" class="action-button action-button--edit">
+                                        <img src="{{ asset('icons/edit.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
                                         <span class="sr-only">Edit</span>
                                     </button>
-                                    <a href="{{ route('projects.tasks', $project) }}" title="Open tasks" aria-label="Open tasks for {{ $project->name }}" class="grid h-8 w-8 place-items-center rounded-md bg-sky-100/70 text-sky-500 transition hover:bg-sky-200 hover:text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
-                                        <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="9" />
-                                            <path d="M12 7v5l4 2" />
-                                        </svg>
+                                    <a href="{{ route('projects.tasks', $project) }}" title="Open tasks" aria-label="Open tasks for {{ $project->name }}" class="action-button action-button--tasks">
+                                        <img src="{{ asset('icons/clock.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
                                         <span class="sr-only">Tasks</span>
                                     </a>
-                                    <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" title="Delete project" aria-label="Delete {{ $project->name }}" class="grid h-8 w-8 place-items-center rounded-md bg-red-100/70 text-red-500 transition hover:bg-red-200 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50">
-                                        <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5 6l1 14a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1l1-14M10 10v7M14 10v7" />
-                                        </svg>
+                                    <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" title="Delete project" aria-label="Delete {{ $project->name }}" class="action-button action-button--delete">
+                                        <img src="{{ asset('icons/trash.svg') }}" class="h-4 w-4" alt="" aria-hidden="true">
                                         <span class="sr-only">Delete</span>
                                     </button>
                                 </div>

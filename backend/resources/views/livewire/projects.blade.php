@@ -51,7 +51,7 @@
         <h2 id="projects-heading" class="sr-only">Projects</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
-                <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <thead class="bg-white text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th scope="col" class="px-6 py-4">Project</th>
                         <th scope="col" class="px-6 py-4">Number of tasks</th>
@@ -70,9 +70,9 @@
                                 <span @class(['rounded-full px-3 py-1 text-xs font-semibold', 'bg-emerald-100 text-emerald-700' => $project->is_active, 'bg-slate-100 text-slate-600' => ! $project->is_active])>{{ $project->is_active ? 'Active' : 'Inactive' }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex justify-end gap-2">
-                                    <button type="button" wire:click="edit({{ $project->id }})" wire:loading.attr="disabled" aria-label="Edit {{ $project->name }}" title="Edit project" class="grid h-8 w-8 place-items-center rounded-md bg-indigo-100 text-indigo-700 transition hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"><svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 3.487 3.651 3.651M4.5 19.5l4.22-.844L19.33 8.046a2.582 2.582 0 0 0-3.651-3.651L5.07 15.005 4.5 19.5Z" /></svg><span class="sr-only">Edit</span></button>
-                                    <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete {{ $project->name }}" title="Delete project" class="grid h-8 w-8 place-items-center rounded-md bg-red-100 text-red-700 transition hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50"><svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.8-.284m-12.456.45c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.8-.284m7.932 0a48.67 48.67 0 0 0-7.932 0M14.25 3.75h-4.5" /></svg><span class="sr-only">Delete</span></button>
+                                <div class="action-group">
+                                    <button type="button" wire:click="edit({{ $project->id }})" wire:loading.attr="disabled" aria-label="Edit {{ $project->name }}" title="Edit project" class="action-button action-button--edit"><img src="{{ asset('icons/edit.svg') }}" class="h-4 w-4" alt="" aria-hidden="true"><span class="sr-only">Edit</span></button>
+                                    <button type="button" wire:click="delete({{ $project->id }})" wire:confirm="Delete this project and all its tasks? This cannot be undone." wire:loading.attr="disabled" aria-label="Delete {{ $project->name }}" title="Delete project" class="action-button action-button--delete"><img src="{{ asset('icons/trash.svg') }}" class="h-4 w-4" alt="" aria-hidden="true"><span class="sr-only">Delete</span></button>
                                 </div>
                             </td>
                         </tr>
