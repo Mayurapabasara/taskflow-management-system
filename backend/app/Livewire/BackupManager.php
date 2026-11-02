@@ -12,7 +12,7 @@ class BackupManager extends Component
     public function render(): View
     {
         return view('livewire.backup-manager', [
-            'projects' => Project::withCount([
+            'projects' => Project::with(['tasks.assignee'])->withCount([
                 'tasks',
                 'tasks as completed_tasks_count' => fn (Builder $query) => $query->where('is_completed', true),
             ])->latest('id')->get(),
