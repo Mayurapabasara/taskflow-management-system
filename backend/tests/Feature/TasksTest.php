@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Projects;
+use App\Livewire\ProjectTasks;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
@@ -20,22 +20,17 @@ class TasksTest extends TestCase
         $first->tasks()->create(['title' => 'First task']);
         $second->tasks()->create(['title' => 'Second task']);
 
-        Livewire::test(Projects::class)
-            ->assertDontSee('First task')
-            ->call('selectProject', $first->id)
-            ->assertSee('First task')
-            ->assertDontSee('Second task')
-            ->call('selectProject', $second->id)
-            ->assertSee('Second task')
-            ->assertDontSee('First task');
+        Livewire::test(ProjectTasks::class, ['project' => $first])
+            ->assertSee('First task')->assertDontSee('Second task');
+        Livewire::test(ProjectTasks::class, ['project' => $second])
+            ->assertSee('Second task')->assertDontSee('First task');
     }
 
     public function test_tasks_are_created_in_the_selected_project_and_counts_update(): void
     {
         $project = $this->project();
 
-        Livewire::test(Projects::class)
-            ->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->assertSee('No tasks yet.')
             ->set('taskTitle', '  New task  ')
             ->call('saveTask')
@@ -51,7 +46,7 @@ class TasksTest extends TestCase
     {
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Original']);
-        $component = Livewire::test(Projects::class)->call('selectProject', $project->id);
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project]);
 
         foreach (['   ' => 'required', str_repeat('a', 256) => 'max'] as $title => $rule) {
             $component->set('taskTitle', $title)->call('saveTask')->assertHasErrors(['taskTitle' => $rule]);
@@ -69,7 +64,7 @@ class TasksTest extends TestCase
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Original', 'is_completed' => true]);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('editTask', $task->id)->assertSet('taskTitle', 'Original')
             ->set('taskTitle', ' Updated ')->call('saveTask')->assertHasNoErrors()
             ->assertSet('editingTaskId', null)->assertSee('Updated');
@@ -83,7 +78,7 @@ class TasksTest extends TestCase
         $task = $project->tasks()->create(['title' => 'Remove me']);
         $otherTask = $this->project()->tasks()->create(['title' => 'Keep me']);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('editTask', $task->id)->call('deleteTask', $task->id)
             ->assertHasNoErrors()->assertSet('editingTaskId', null)->assertSet('taskTitle', '')
             ->assertSee('No tasks yet.')->assertSee('0 / 0 tasks completed');
@@ -92,28 +87,47 @@ class TasksTest extends TestCase
         $this->assertModelExists($otherTask);
     }
 
+    public function test_task_creation_editing_and_deletion_use_in_page_popups(): void
+    {
+        $project = $this->project();
+        $task = $project->tasks()->create(['title' => 'Remove me']);
+
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project])
+            ->call('startCreatingTask')->assertSet('showTaskForm', true)->assertSee('New task')
+            ->call('cancelTask')->assertSet('showTaskForm', false)
+            ->call('editTask', $task->id)->assertSet('showTaskForm', true)->assertSee('Edit task')
+            ->call('confirmDeleteTask', $task->id)
+            ->assertSet('deletingTaskId', $task->id)
+            ->assertSee('Delete task?')
+            ->call('cancelDeleteTask')->assertSet('deletingTaskId', null)
+            ->call('confirmDeleteTask', $task->id)->call('deleteTask')
+            ->assertSet('deletingTaskId', null)->assertSee('Task deleted.');
+
+        $this->assertModelMissing($task);
+    }
+
     public function test_another_projects_tasks_cannot_be_edited_or_deleted(): void
     {
         $project = $this->project();
         $otherTask = $this->project()->tasks()->create(['title' => 'Protected']);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('editTask', $otherTask->id)->assertNotFound();
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('deleteTask', $otherTask->id)->assertNotFound();
 
         $this->assertSame('Protected', $otherTask->fresh()->title);
     }
 
-    public function test_switching_projects_clears_task_edit_state_and_errors(): void
+    public function test_opening_another_project_starts_with_a_clean_task_form(): void
     {
         $project = $this->project();
         $other = $this->project();
         $task = $project->tasks()->create(['title' => 'Original']);
-
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('editTask', $task->id)->set('taskTitle', '')->call('saveTask')
-            ->assertHasErrors('taskTitle')->call('selectProject', $other->id)
+            ->assertHasErrors('taskTitle');
+        Livewire::test(ProjectTasks::class, ['project' => $other])
             ->assertHasNoErrors()->assertSet('editingTaskId', null)->assertSet('taskTitle', '');
     }
 
@@ -125,14 +139,14 @@ class TasksTest extends TestCase
 
         $this->expectException(CannotUpdateLockedPropertyException::class);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('editTask', $task->id)->set('editingTaskId', $otherTask->id);
     }
 
     public function test_task_operations_require_a_selected_existing_project(): void
     {
-        Livewire::test(Projects::class)->set('taskTitle', 'Orphan')->call('saveTask')->assertNotFound();
-        Livewire::test(Projects::class)->call('selectProject', 999)->assertNotFound();
+        Livewire::test(ProjectTasks::class, ['project' => new Project])->assertNotFound();
+        $this->get(route('projects.tasks', 999))->assertNotFound();
         $this->assertDatabaseCount('tasks', 0);
     }
 
@@ -141,18 +155,18 @@ class TasksTest extends TestCase
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Toggle this task']);
 
-        $component = Livewire::test(Projects::class)->call('selectProject', $project->id)
-            ->assertSee('0 / 1 tasks completed')->assertSee('0%')
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project])
+            ->assertSee('0 / 1 tasks completed')->assertDontSee('%')
             ->assertDontSee('line-through');
         $this->assertCheckboxState($component->html(), $task->id, false);
 
         $component->call('toggleTask', $task->id)->assertHasNoErrors()
-            ->assertSee('1 / 1 tasks completed')->assertSee('100%')->assertSee('line-through');
+            ->assertSee('1 / 1 tasks completed')->assertDontSee('%')->assertSee('line-through');
         $this->assertTrue($task->fresh()->is_completed);
         $this->assertCheckboxState($component->html(), $task->id, true);
 
         $component->call('toggleTask', $task->id)->assertHasNoErrors()
-            ->assertSee('0 / 1 tasks completed')->assertSee('0%')->assertDontSee('line-through');
+            ->assertSee('0 / 1 tasks completed')->assertDontSee('%')->assertDontSee('line-through');
         $this->assertFalse($task->fresh()->is_completed);
         $this->assertCheckboxState($component->html(), $task->id, false);
     }
@@ -164,12 +178,12 @@ class TasksTest extends TestCase
         $other = $this->project();
         $otherTask = $other->tasks()->create(['title' => 'Other']);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('toggleTask', $task->id)
-            ->assertSee('1 / 1 tasks completed')->assertSee('0 / 1 tasks completed');
+            ->assertSee('1 / 1 tasks completed');
         $this->assertFalse($otherTask->fresh()->is_completed);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('toggleTask', $otherTask->id)->assertNotFound();
         $this->assertFalse($otherTask->fresh()->is_completed);
     }
@@ -179,8 +193,8 @@ class TasksTest extends TestCase
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Unchanged']);
 
-        Livewire::test(Projects::class)->call('toggleTask', $task->id)->assertNotFound();
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => new Project])->assertNotFound();
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('toggleTask', 999)->assertNotFound();
 
         $this->assertFalse($task->fresh()->is_completed);
@@ -189,18 +203,18 @@ class TasksTest extends TestCase
     public function test_completed_and_total_counts_stay_correct_through_a_task_lifecycle(): void
     {
         $project = $this->project();
-        $component = Livewire::test(Projects::class)->call('selectProject', $project->id)
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project])
             ->set('taskTitle', 'First')->call('saveTask')
             ->set('taskTitle', 'Second')->call('saveTask');
         $first = $project->tasks()->where('title', 'First')->firstOrFail();
         $second = $project->tasks()->where('title', 'Second')->firstOrFail();
 
-        $component->call('toggleTask', $first->id)->assertSee('1 / 2 tasks completed')->assertSee('50%')
+        $component->call('toggleTask', $first->id)->assertSee('1 / 2 tasks completed')->assertDontSee('%')
             ->call('editTask', $first->id)->set('taskTitle', 'Renamed')->call('saveTask')
-            ->assertSee('1 / 2 tasks completed')->assertSee('50%')
-            ->call('deleteTask', $first->id)->assertSee('0 / 1 tasks completed')->assertSee('0%')
-            ->call('toggleTask', $second->id)->assertSee('1 / 1 tasks completed')->assertSee('100%')
-            ->call('deleteTask', $second->id)->assertSee('0 / 0 tasks completed')->assertSee('0%');
+            ->assertSee('1 / 2 tasks completed')->assertDontSee('%')
+            ->call('deleteTask', $first->id)->assertSee('0 / 1 tasks completed')->assertDontSee('%')
+            ->call('toggleTask', $second->id)->assertSee('1 / 1 tasks completed')->assertDontSee('%')
+            ->call('deleteTask', $second->id)->assertSee('0 / 0 tasks completed')->assertDontSee('%');
 
         $this->assertDatabaseCount('tasks', 0);
     }
@@ -208,7 +222,7 @@ class TasksTest extends TestCase
     public function test_maximum_title_length_is_accepted_on_creation_and_editing(): void
     {
         $project = $this->project();
-        $component = Livewire::test(Projects::class)->call('selectProject', $project->id)
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project])
             ->set('taskTitle', str_repeat('a', 255))->call('saveTask')->assertHasNoErrors();
         $task = $project->tasks()->firstOrFail();
 
@@ -223,7 +237,7 @@ class TasksTest extends TestCase
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Original']);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)->call('editTask', $task->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])->call('editTask', $task->id)
             ->set('taskTitle', str_repeat('a', 256))->call('saveTask')->assertHasErrors(['taskTitle' => 'max'])
             ->call('cancelTask')->assertHasNoErrors()->assertSet('editingTaskId', null)->assertSet('taskTitle', '');
 
@@ -236,7 +250,7 @@ class TasksTest extends TestCase
         $other = $this->project();
         $this->expectException(CannotUpdateLockedPropertyException::class);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)->set('selectedProjectId', $other->id);
+        Livewire::test(ProjectTasks::class, ['project' => $project])->set('selectedProjectId', $other->id);
     }
 
     public function test_task_titles_are_escaped_when_rendered(): void
@@ -244,7 +258,7 @@ class TasksTest extends TestCase
         $project = $this->project();
         $project->tasks()->create(['title' => '<script>alert(1)</script>']);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
             ->assertDontSee('<script>alert(1)</script>', false);
     }
@@ -254,9 +268,9 @@ class TasksTest extends TestCase
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Keep']);
 
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('editTask', 999)->assertNotFound();
-        Livewire::test(Projects::class)->call('selectProject', $project->id)
+        Livewire::test(ProjectTasks::class, ['project' => $project])
             ->call('deleteTask', 999)->assertNotFound();
 
         $this->assertModelExists($task);

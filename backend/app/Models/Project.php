@@ -6,12 +6,20 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'description'])]
+#[Fillable(['name', 'description', 'is_active'])]
 class Project extends Model
 {
     /** @return HasMany<Task, $this> */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 }

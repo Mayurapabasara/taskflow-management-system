@@ -14,12 +14,10 @@ class ProjectsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_project_page_renders_the_component_and_empty_state(): void
+    public function test_legacy_projects_url_redirects_to_the_project_dashboard(): void
     {
         $this->get(route('projects.index'))
-            ->assertOk()
-            ->assertSeeLivewire(Projects::class)
-            ->assertSee('No projects yet');
+            ->assertRedirect(route('backups.index'));
     }
 
     public function test_projects_can_be_created_with_trimmed_input(): void
@@ -31,10 +29,9 @@ class ProjectsTest extends TestCase
             ->assertHasNoErrors()
             ->assertSet('name', '')
             ->assertSet('description', '')
-            ->assertSee('Project created.')
-            ->assertSee('Assessment');
+            ->assertSee('Project created.');
 
-        $this->assertDatabaseHas('projects', ['name' => 'Assessment', 'description' => 'Build TaskFlow.']);
+        $this->assertDatabaseHas('projects', ['name' => 'Assessment', 'description' => 'Build TaskFlow.', 'is_active' => true]);
     }
 
     public function test_blank_project_fields_are_rejected(): void
@@ -68,14 +65,16 @@ class ProjectsTest extends TestCase
             ->call('edit', $project->id)
             ->assertSet('name', $project->name)
             ->assertSet('description', $project->description)
+            ->assertSet('isActive', true)
             ->set('name', 'Updated')
             ->set('description', 'Updated description')
+            ->set('isActive', false)
             ->call('save')
             ->assertHasNoErrors()
             ->assertSet('editingId', null)
             ->assertSee('Project updated.');
 
-        $this->assertDatabaseHas('projects', ['id' => $project->id, 'name' => 'Updated', 'description' => 'Updated description']);
+        $this->assertDatabaseHas('projects', ['id' => $project->id, 'name' => 'Updated', 'description' => 'Updated description', 'is_active' => false]);
         $this->assertSame('Other', $other->fresh()->name);
         $this->assertDatabaseCount('projects', 2);
     }
@@ -93,25 +92,31 @@ class ProjectsTest extends TestCase
             ->assertSet('editingId', null)
             ->assertSet('name', '')
             ->assertSet('description', '')
+            ->assertSet('isActive', true)
             ->assertHasNoErrors();
 
         $this->assertSame('Assessment', $project->fresh()->name);
     }
 
-    public function test_project_list_shows_counts_scoped_to_each_project(): void
+    public function test_project_table_shows_task_counts_and_active_status(): void
     {
         $project = $this->project();
         $project->tasks()->create(['title' => 'Done', 'is_completed' => true]);
         $project->tasks()->create(['title' => 'Pending']);
         $other = $this->project('Other');
         $other->tasks()->create(['title' => 'Other pending']);
+        $other->update(['is_active' => false]);
 
         Livewire::test(Projects::class)
+            ->assertSee('New Project')
             ->assertSee('Assessment')
-            ->assertSee('Project description')
-            ->assertSee('1 / 2 tasks completed')
-            ->assertSee('50%')
-            ->assertSee('0 / 1 tasks completed');
+            ->assertSee('Other')
+            ->assertSee('2')
+            ->assertSee('1')
+            ->assertSee('Active')
+            ->assertSee('Inactive')
+            ->assertSee('Edit')
+            ->assertSee('Delete');
     }
 
     public function test_deleting_a_project_resets_its_edit_form_and_preserves_other_projects(): void
@@ -132,7 +137,7 @@ class ProjectsTest extends TestCase
         $this->assertDatabaseCount('tasks', 0);
     }
 
-    public function test_project_content_is_escaped(): void
+    public function test_project_content_is_escaped_in_the_project_table(): void
     {
         $this->project('<script>alert(1)</script>');
 

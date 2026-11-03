@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Actions\DeleteProject;
 use App\Livewire\Projects;
+use App\Livewire\ProjectTasks;
 use App\Models\Project;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -105,17 +106,16 @@ class DeleteProjectTest extends TestCase
     {
         $project = $this->project();
         $task = $project->tasks()->create(['title' => 'Task']);
-        $component = Livewire::test(Projects::class)->call('selectProject', $project->id);
-
-        $component->call('toggleTask', $task->id)->call('toggleTask', $task->id)
-            ->call('delete', $project->id)->assertHasErrors('deletion')
-            ->assertSet('selectedProjectId', $project->id);
+        $tasks = Livewire::test(ProjectTasks::class, ['project' => $project]);
+        $component = Livewire::test(Projects::class);
+        $tasks->call('toggleTask', $task->id)->call('toggleTask', $task->id);
+        $component->call('delete', $project->id)->assertHasErrors('deletion');
         $this->assertModelExists($project);
         $this->assertModelExists($task);
 
-        $component->call('toggleTask', $task->id)->call('delete', $project->id)
-            ->assertHasNoErrors()->assertSet('selectedProjectId', null)->assertSet('editingTaskId', null)
-            ->assertSee('Project deleted.');
+        $tasks->call('toggleTask', $task->id);
+        $component->call('delete', $project->id)
+            ->assertHasNoErrors()->assertSee('Project deleted.');
         $this->assertModelMissing($project);
         $this->assertModelMissing($task);
     }
