@@ -31,6 +31,24 @@
                     class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"></textarea>
                 <p id="description-error" aria-live="polite" class="mt-1 text-sm text-red-700">@error('description') {{ $message }} @enderror</p>
             </div>
+            <fieldset class="sm:col-span-2" aria-describedby="members-error">
+                <legend class="mb-2 text-sm font-medium">Team members</legend>
+                <p class="mb-3 text-sm text-slate-600">Select the people assigned to this project.</p>
+                <div class="grid max-h-56 gap-3 overflow-y-auto rounded-lg border border-slate-200 p-3 sm:grid-cols-2">
+                    @forelse ($users as $user)
+                        <label wire:key="project-member-{{ $user->id }}" class="flex items-center gap-3 text-sm">
+                            <input type="checkbox" wire:model="memberIds" value="{{ $user->id }}" class="h-4 w-4 rounded accent-indigo-600">
+                            <span>{{ $user->name }} <span class="text-slate-500">({{ $user->email }})</span></span>
+                        </label>
+                    @empty
+                        <p class="text-sm text-slate-600 sm:col-span-2">No team members are available yet. You can save the project without members.</p>
+                    @endforelse
+                </div>
+                <div id="members-error" aria-live="polite" class="mt-1 text-sm text-red-700">
+                    @error('memberIds') <p>{{ $message }}</p> @enderror
+                    @error('memberIds.*') <p>{{ $message }}</p> @enderror
+                </div>
+            </fieldset>
             <label class="inline-flex items-center gap-3 text-sm font-medium sm:col-span-2">
                 <input type="checkbox" wire:model="isActive" class="h-4 w-4 rounded accent-indigo-600">
                 Project is active
@@ -54,6 +72,7 @@
                 <thead class="bg-white text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <tr>
                         <th scope="col" class="px-6 py-4">Project</th>
+                        <th scope="col" class="px-6 py-4">Team members</th>
                         <th scope="col" class="px-6 py-4">Number of tasks</th>
                         <th scope="col" class="px-6 py-4">Completed tasks</th>
                         <th scope="col" class="px-6 py-4">Status</th>
@@ -64,6 +83,7 @@
                     @forelse ($projects as $project)
                         <tr wire:key="project-{{ $project->id }}" class="hover:bg-slate-50">
                             <td class="px-6 py-4 font-semibold text-slate-900">{{ $project->name }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $project->members->pluck('name')->join(', ') ?: 'Unassigned' }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $project->tasks_count }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $project->completed_tasks_count }}</td>
                             <td class="px-6 py-4">
@@ -78,7 +98,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <p class="font-semibold text-slate-900">No projects yet</p>
                                 <p class="mt-2 text-slate-600">Create your first project above.</p>
                             </td>

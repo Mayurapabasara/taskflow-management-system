@@ -4,8 +4,10 @@ namespace App\Livewire;
 
 use App\Actions\DeleteProject;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -20,6 +22,9 @@ class Projects extends Component
 
     public bool $isActive = true;
 
+    /** @var array<int, int|string> */
+    public array $memberIds = [];
+
     public function save(): void
     {
         $this->name = trim($this->name);
@@ -29,6 +34,8 @@ class Projects extends Component
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:10000'],
             'isActive' => ['boolean'],
+            'memberIds' => ['array'],
+            'memberIds.*' => ['required', 'integer', 'distinct', 'exists:users,id'],
         ]);
 
         $projectData = [
@@ -37,13 +44,17 @@ class Projects extends Component
             'is_active' => $data['isActive'],
         ];
 
-        if ($this->editingId !== null) {
-            Project::findOrFail($this->editingId)->update($projectData);
-            $message = 'Project updated.';
-        } else {
-            Project::create($projectData);
-            $message = 'Project created.';
-        }
+        DB::transaction(function () use ($projectData, $data): void {
+            if ($this->editingId !== null) {
+                $project = Project::findOrFail($this->editingId);
+                $project->update($projectData);
+            } else {
+                $project = Project::create($projectData);
+            }
+
+            $project->members()->sync($data['memberIds']);
+        });
+        $message = $this->editingId !== null ? 'Project updated.' : 'Project created.';
 
         $this->cancel();
         session()->flash('status', $message);
@@ -57,11 +68,12 @@ class Projects extends Component
         $this->name = $project->name;
         $this->description = $project->description;
         $this->isActive = $project->is_active;
+        $this->memberIds = $project->members()->pluck('users.id')->all();
     }
 
     public function cancel(): void
     {
-        $this->reset('editingId', 'name', 'description', 'isActive');
+        $this->reset('editingId', 'name', 'description', 'isActive', 'memberIds');
         $this->resetValidation();
     }
 
@@ -82,7 +94,8 @@ class Projects extends Component
     public function render(): View
     {
         return view('livewire.projects', [
-            'projects' => Project::withCount([
+            'users' => User::orderBy('name')->orderBy('id')->get(),
+            'projects' => Project::with('members')->withCount([
                 'tasks',
                 'tasks as completed_tasks_count' => fn (Builder $query) => $query->where('is_completed', true),
             ])->latest('id')->get(),
