@@ -24,7 +24,7 @@ class TaskAssignmentTest extends TestCase
         $this->assertSame($first->id, $task->assignee->id);
 
         $component->call('editTask', $task->id)->assertSet('assignedTo', (string) $first->id)
-            ->assertDontSee('Assign to')
+            ->assertSee('Assign to')
             ->set('taskTitle', 'Updated homepage')->call('saveTask')->assertHasNoErrors();
         $this->assertSame($first->id, $task->fresh()->assignee->id);
 
@@ -44,6 +44,45 @@ class TaskAssignmentTest extends TestCase
         $this->assertDatabaseCount('tasks', 1);
         $this->assertSame($user->id, $task->fresh()->assigned_to);
         $component->call('cancelTask')->assertSet('assignedTo', '')->assertHasNoErrors();
+    }
+
+    public function test_task_can_be_reassigned_and_unassigned_when_edited(): void
+    {
+        $project = Project::create(['name' => 'Website', 'description' => 'Launch']);
+        $first = User::factory()->create();
+        $second = User::factory()->create();
+        $task = $project->tasks()->create(['title' => 'Original', 'assigned_to' => $first->id]);
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project]);
+
+        $component->call('editTask', $task->id)
+            ->set('taskTitle', 'Updated')->set('assignedTo', (string) $second->id)
+            ->call('saveTask')->assertHasNoErrors()->assertSet('showTaskForm', false);
+
+        $this->assertSame('Updated', $task->fresh()->title);
+        $this->assertSame($second->id, $task->fresh()->assigned_to);
+
+        $component->call('editTask', $task->id)->set('assignedTo', '')
+            ->call('saveTask')->assertHasNoErrors();
+
+        $this->assertNull($task->fresh()->assigned_to);
+        $this->assertSame('Updated', $task->fresh()->title);
+    }
+
+    public function test_invalid_assignee_prevents_both_title_and_assignment_updates(): void
+    {
+        $project = Project::create(['name' => 'Website', 'description' => 'Launch']);
+        $user = User::factory()->create();
+        $task = $project->tasks()->create(['title' => 'Original', 'assigned_to' => $user->id]);
+        $component = Livewire::test(ProjectTasks::class, ['project' => $project])
+            ->call('editTask', $task->id);
+
+        foreach (['999999', 'invalid'] as $value) {
+            $component->set('taskTitle', 'Changed')->set('assignedTo', $value)
+                ->call('saveTask')->assertHasErrors('assignedTo')->assertSet('showTaskForm', true);
+
+            $this->assertSame('Original', $task->fresh()->title);
+            $this->assertSame($user->id, $task->fresh()->assigned_to);
+        }
     }
 
     public function test_deleting_an_assignee_preserves_the_task_as_unassigned(): void

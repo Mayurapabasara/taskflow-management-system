@@ -39,21 +39,22 @@ class ProjectTasks extends Component
         $this->taskTitle = trim($this->taskTitle);
         $rules = [
             'taskTitle' => ['required', 'string', 'max:255'],
+            'assignedTo' => ['nullable', 'integer', 'exists:users,id'],
         ];
-
-        if ($this->editingTaskId === null) {
-            $rules['assignedTo'] = ['nullable', 'integer', 'exists:users,id'];
-        }
 
         $this->validate($rules, [], ['taskTitle' => 'title', 'assignedTo' => 'assignee']);
 
         DB::transaction(function (): void {
             $project = Project::query()->lockForUpdate()->findOrFail($this->selectedProjectId);
+            $attributes = [
+                'title' => $this->taskTitle,
+                'assigned_to' => $this->assignedTo === '' ? null : (int) $this->assignedTo,
+            ];
 
             if ($this->editingTaskId !== null) {
-                $project->tasks()->findOrFail($this->editingTaskId)->update(['title' => $this->taskTitle]);
+                $project->tasks()->findOrFail($this->editingTaskId)->update($attributes);
             } else {
-                $project->tasks()->create(['title' => $this->taskTitle, 'assigned_to' => $this->assignedTo === '' ? null : (int) $this->assignedTo]);
+                $project->tasks()->create($attributes);
             }
         }, attempts: 3);
 
